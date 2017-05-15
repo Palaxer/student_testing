@@ -144,9 +144,12 @@ public class MySQLCategoryDao implements CategoryDao {
      */
     @Override
     public boolean update(Category category) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = update(category, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = update(category, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -184,9 +187,12 @@ public class MySQLCategoryDao implements CategoryDao {
      */
     @Override
     public boolean insert(Category category) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = insert(category, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = insert(category, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -228,9 +234,12 @@ public class MySQLCategoryDao implements CategoryDao {
      */
     @Override
     public boolean delete(Category category) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = delete(category, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = delete(category, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }

@@ -147,9 +147,12 @@ public class MySQLQuestionDao implements QuestionDao {
      */
     @Override
     public boolean update(Question question) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = update(question, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = update(question, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -189,9 +192,12 @@ public class MySQLQuestionDao implements QuestionDao {
      */
     @Override
     public boolean insert(Question question) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = insert(question, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = insert(question, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -234,9 +240,12 @@ public class MySQLQuestionDao implements QuestionDao {
      */
     @Override
     public boolean delete(Question question) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = delete(question, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = delete(question, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }

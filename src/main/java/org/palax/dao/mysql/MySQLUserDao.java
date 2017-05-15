@@ -229,9 +229,12 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean update(User user) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = update(user, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = update(user, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -244,7 +247,7 @@ public class MySQLUserDao implements UserDao {
         return update(user, tx.getConnection());
     }
 
-    boolean update(User user, Connection con) {
+    private boolean update(User user, Connection con) {
         String SQL = "UPDATE user SET LOGIN=?, PASSWD=?, NAME=?, SURNAME=?, ROLE_ID=? WHERE USER_ID=?";
 
         logger.debug("Try update USER " + user);
@@ -277,9 +280,12 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean insert(User user) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = insert(user, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = insert(user, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -292,7 +298,7 @@ public class MySQLUserDao implements UserDao {
         return insert(user, tx.getConnection());
     }
 
-    boolean insert(User user, Connection con) {
+    private boolean insert(User user, Connection con) {
         String SQL = "INSERT INTO user (LOGIN, PASSWD, NAME, SURNAME, ROLE_ID) VALUES (?, ?, ?, ?, ?)";
 
         logger.debug("Try insert USER " + user);
@@ -328,9 +334,12 @@ public class MySQLUserDao implements UserDao {
      */
     @Override
     public boolean delete(User user) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = delete(user, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = delete(user, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -343,7 +352,7 @@ public class MySQLUserDao implements UserDao {
         return delete(user, tx.getConnection());
     }
 
-    boolean delete(User user, Connection con) {
+    private boolean delete(User user, Connection con) {
         String SQL = "DELETE FROM user WHERE USER_ID=?";
 
         logger.debug("Try delete USER " + user);

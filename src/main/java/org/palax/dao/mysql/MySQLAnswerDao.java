@@ -121,9 +121,12 @@ public class MySQLAnswerDao implements AnswerDao {
      */
     @Override
     public boolean update(Answer answer) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = update(answer, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = update(answer, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -164,9 +167,12 @@ public class MySQLAnswerDao implements AnswerDao {
      */
     @Override
     public boolean insert(Answer answer) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = insert(answer, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = insert(answer, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -210,9 +216,12 @@ public class MySQLAnswerDao implements AnswerDao {
      */
     @Override
     public boolean delete(Answer answer) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = delete(answer, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = delete(answer, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }

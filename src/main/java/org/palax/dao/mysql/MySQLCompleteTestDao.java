@@ -265,9 +265,12 @@ public class MySQLCompleteTestDao implements CompleteTestDao {
      */
     @Override
     public boolean update(CompleteTest completeTest) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = update(completeTest, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = update(completeTest, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -312,9 +315,12 @@ public class MySQLCompleteTestDao implements CompleteTestDao {
      */
     @Override
     public boolean insert(CompleteTest completeTest) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = insert(completeTest, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = insert(completeTest, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
@@ -362,9 +368,12 @@ public class MySQLCompleteTestDao implements CompleteTestDao {
      */
     @Override
     public boolean delete(CompleteTest completeTest) {
-        Connection con = dataSourceManager.getConnection();
-        boolean result = delete(completeTest, con);
-        dataSourceManager.closeConnection(con);
+        boolean result = false;
+        try(Connection con = dataSourceManager.getConnection()) {
+            result = delete(completeTest, con);
+        } catch (SQLException e) {
+            logger.error("Threw a SQLException, full stack trace follows:",e);
+        }
 
         return result;
     }
