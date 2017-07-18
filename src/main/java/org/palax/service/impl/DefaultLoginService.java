@@ -11,9 +11,7 @@ import org.palax.service.LoginService;
  * {@inheritDoc}
  */
 public class DefaultLoginService implements LoginService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultLoginService.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile LoginService loginService;
     private static UserDao userDao;
 

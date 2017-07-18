@@ -9,11 +9,9 @@ import org.palax.dao.mysql.*;
  *
  * @author Taras Palashynskyy
  */
-
 public class MySQLDAOFactory {
 
     private MySQLDAOFactory() {
-
     }
 
     public static RoleDao getRoleDao() {

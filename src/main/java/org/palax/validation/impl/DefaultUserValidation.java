@@ -9,9 +9,7 @@ import java.util.regex.Pattern;
  * {@inheritDoc}
  */
 public class DefaultUserValidation implements UserValidation {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultUserValidation.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile UserValidation userValidation;
 
     private DefaultUserValidation() {

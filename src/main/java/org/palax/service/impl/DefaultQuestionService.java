@@ -15,9 +15,7 @@ import java.util.List;
  * {@inheritDoc}
  */
 public class DefaultQuestionService implements QuestionService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultQuestionService.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile QuestionService questionService;
     private static QuestionDao questionDao;
 
@@ -50,13 +48,11 @@ public class DefaultQuestionService implements QuestionService {
      */
     @Override
     public List<Question> findAllByTest(Test test) {
-
         return questionDao.findAllByTest(test);
     }
 
     @Override
     public Question findById(Long id) {
-
         return questionDao.findById(id);
     }
 
@@ -65,7 +61,6 @@ public class DefaultQuestionService implements QuestionService {
      */
     @Override
     public boolean update(Question question) {
-
         return questionDao.update(question);
     }
 
@@ -74,7 +69,6 @@ public class DefaultQuestionService implements QuestionService {
      */
     @Override
     public boolean create(Question question) {
-
         return questionDao.insert(question);
     }
 
@@ -83,7 +77,6 @@ public class DefaultQuestionService implements QuestionService {
      */
     @Override
     public boolean delete(Question question) {
-
         return questionDao.delete(question);
     }
 }

@@ -17,9 +17,8 @@ import java.util.List;
  * {@inheritDoc}
  */
 public class DefaultUserService implements UserService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultUserService.class);
-    /**Singleton object which is returned when you try to create a new instance */
+
     private static volatile UserService userService;
     private static UserDao userDao;
     private static RoleDao roleDao;
@@ -56,9 +55,7 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public boolean create(User user) {
-
         user.setRole(roleDao.find(user.getRole()));
-
         return userDao.insert(user);
     }
 
@@ -67,13 +64,11 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public List<User> findAll(int offSet, int numberOfElement) {
-
         return userDao.findAll(offSet, numberOfElement);
     }
 
     @Override
     public List<User> findAllByRole(Role role, int offSet, int numberOfElement) {
-
         return userDao.findAllByRole(role, offSet, numberOfElement);
     }
 
@@ -82,7 +77,6 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public User findById(Long id) {
-
         return userDao.findById(id);
     }
 
@@ -91,7 +85,6 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public User findByLogin(String login) {
-
         return userDao.findByLogin(login);
     }
 
@@ -100,7 +93,6 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public long count() {
-
         return userDao.count();
     }
 
@@ -109,7 +101,6 @@ public class DefaultUserService implements UserService {
      */
     @Override
     public long countByRole(Role role) {
-
         return userDao.countByRole(role);
     }
 
@@ -119,7 +110,6 @@ public class DefaultUserService implements UserService {
     @Override
     public boolean changeRole(User user, Role role) {
         user.setRole(roleDao.find(role));
-
         return update(user);
     }
 

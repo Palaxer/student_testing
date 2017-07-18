@@ -15,32 +15,16 @@ import java.sql.SQLException;
  *
  * @author Taras Palashynskyy
  */
-
 public class DefaultDataSourceManager implements DataSourceManager {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DataSourceManager.class);
-    /**Singleton object which is returned when you try to create a new instance */
+    private static final String DATA_SOURCE_JNDI_NAME = "jdbc/student-testing-db";
+    private static final String ENVIRONMENT_JNDI_NAME = "java:/comp/env";
+
     private static volatile DataSourceManager dataSourceManager;
-    /**Data source object which use to get db connection. */
     private static DataSource ds;
 
-    /**
-     * Initialization data source object if the @{code dataSource} is not initialized
-     * is stored @{code null} value
-     */
     private DefaultDataSourceManager() {
-        try {
-            logger.debug("Try to get connection pool");
-            Context initialContext = new InitialContext();
-            Context envContext = (Context) initialContext.lookup("java:/comp/env");
-            ds = (DataSource) envContext.lookup("jdbc/student-testing-db");
-            if (ds != null)
-                logger.debug("Connection pool is successfully received");
-            else
-                logger.error("Connection pool is not received");
-        } catch (NamingException e) {
-            logger.error("Threw a NamingException, full stack trace follows:",e);
-        }
+        lookupDataSource();
     }
 
     /**
@@ -71,12 +55,8 @@ public class DefaultDataSourceManager implements DataSourceManager {
         Connection connection = null;
 
         try {
-            logger.debug("Try get connection");
-            connection = ds.getConnection();
-            if (connection != null)
-                logger.debug("Connection is successfully received");
-            else
-                logger.error("Connection is not received");
+            connection = tryGetConnection();
+            checkConnection(connection);
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         }
@@ -88,12 +68,51 @@ public class DefaultDataSourceManager implements DataSourceManager {
      * {@inheritDoc}
      */
     @Override
-    public void closeConnection(Connection con) {
+    public void closeConnection(Connection connection) {
         try {
-            if (con != null)
-                con.close();
+            tryColseConnection(connection);
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:",e);
         }
+    }
+
+    private void lookupDataSource() {
+        try {
+            tryLookupDataSource();
+            checkDataSourceLookup();
+        } catch (NamingException e) {
+            logger.error("Threw a NamingException, full stack trace follows:",e);
+        }
+    }
+
+    private void tryLookupDataSource() throws NamingException {
+        logger.debug("Try to get connection pool");
+        Context initialContext = new InitialContext();
+        Context envContext = (Context) initialContext.lookup(ENVIRONMENT_JNDI_NAME);
+        ds = (DataSource) envContext.lookup(DATA_SOURCE_JNDI_NAME);
+    }
+
+    private void checkDataSourceLookup() {
+        if (ds != null)
+            logger.debug("Connection pool is successfully received");
+        else
+            logger.error("Connection pool is not received");
+    }
+
+    private Connection tryGetConnection() throws SQLException {
+        logger.debug("Try get connection");
+        return ds.getConnection();
+    }
+
+    private void checkConnection(Connection connection) {
+        if (connection != null)
+            logger.debug("Connection is successfully received");
+        else
+            logger.error("Connection is not received");
+    }
+
+    private void tryColseConnection(Connection connection) throws SQLException {
+        if (connection != null)
+            connection.close();
     }
 }

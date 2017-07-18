@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="d" uri="/WEB-INF/date-format.tld"%>
+<%@ taglib prefix="t" uri="/WEB-INF/complete-time-format.tld"%>
 <%@ page session="true"  isELIgnored="false" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 
 <c:set var="language" value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}" scope="session" />
@@ -115,7 +116,7 @@
                                             <td><c:out value="${test.id}"/></td>
                                             <td><c:out value="${test.score}"/></td>
                                             <td><d:dateFrm date="${test.startTime}" local="${language}"/></td>
-                                            <td><c:out value="${test.elapsedTime}"/></td>
+                                            <td><t:timeFrm time="${test.elapsedTime}"/></td>
                                             <td><c:out value="${test.passed}"/></td>
                                             <td><c:out value="${test.test.id}"/></td>
                                             <td>

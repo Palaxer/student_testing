@@ -2,6 +2,7 @@ package org.palax.command.admin;
 
 import org.apache.log4j.Logger;
 import org.palax.command.Command;
+import org.palax.exception.PageNotFoundException;
 import org.palax.strategy.*;
 import org.palax.util.PathManager;
 import org.palax.util.SessionAttributeHelper;
@@ -17,10 +18,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Taras Palashynskyy
  */
 public class GetAllUserCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(GetAllUserCommand.class);
-
     private static final int ELEMENT_PER_PAGE = 10;
+
     private static SessionAttributeHelper sessionHelper;
 
     public GetAllUserCommand() {
@@ -47,35 +47,17 @@ public class GetAllUserCommand implements Command {
             logger.error("Threw a NumberFormatException, full stack trace follows:", e);
         }
 
-        GetUser userStrategy;
-
         String role = request.getParameter("role");
         request.setAttribute("role", role);
 
-        switch (role.toUpperCase()) {
-            case "ALL" :
-                userStrategy = new GetUser(new GetAllUser());
-                break;
-            case "ADMIN" :
-                userStrategy = new GetUser(new GetAllAdmin());
-                break;
-            case "TUTOR" :
-                userStrategy = new GetUser(new GetAllTutor());
-                break;
-            case "STUDENT" :
-                userStrategy = new GetUser(new GetAllStudent());
-                break;
-            default:
-                request.setAttribute("role", "all");
-                userStrategy = new GetUser(new GetAllUser());
-                break;
-        }
+        GetUser userStrategy = new GetUser(role);
+
         long count = userStrategy.count();
 
         int pageNumber = (int) Math.ceil(count * 1.0 / ELEMENT_PER_PAGE);
 
         if(currentPage > pageNumber)
-            return PathManager.getProperty("path.page.error404");
+            throw new PageNotFoundException("The specified page was not found");
 
         request.setAttribute("pageNumber", pageNumber);
         request.setAttribute("currentPage", currentPage);

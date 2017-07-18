@@ -31,10 +31,8 @@ import java.util.Map;
  */
 
 public class CommandHelper {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(CommandHelper.class);
 
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile CommandHelper commandHelper;
     /**Map that stores the string representation of commands and their instance */
     private final Map<String, Command> commandMapping;
@@ -104,12 +102,6 @@ public class CommandHelper {
         return commandHelper;
     }
 
-    /**
-     *
-     *
-     * @param request {@code request} must contain a {@code "command"} parameter
-     * @return return {@link Command} instance which corresponds to the transmitted command
-     */
     public Command getCommand(HttpServletRequest request) {
         Command current = new EmptyCommand();
 

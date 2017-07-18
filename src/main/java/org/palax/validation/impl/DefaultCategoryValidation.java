@@ -9,9 +9,7 @@ import java.util.regex.Pattern;
  * {@inheritDoc}
  */
 public class DefaultCategoryValidation implements CategoryValidation {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultCategoryValidation.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile CategoryValidation categoryValidation;
 
     private DefaultCategoryValidation() {

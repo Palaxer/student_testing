@@ -10,25 +10,28 @@ import java.util.List;
  *
  * @author Taras Palashynskyy
  */
-
 public class GetUser implements GetUserStrategy {
-    /**Object that stores an instance of a necessary strategy. */
     private GetUserStrategy strategy;
 
-    /**
-     * Constructor which sets the necessary strategy
-     *
-     * @param strategy instance which implements {@link GetUserStrategy} interface
-     */
-    public GetUser(GetUserStrategy strategy) {
-        this.strategy = strategy;
+    public GetUser(String role) {
+        switch (role.toUpperCase()) {
+            case "ALL" :
+                strategy = new GetAllUser();
+                break;
+            case "ADMIN" :
+                strategy = new GetAllAdmin();
+                break;
+            case "TUTOR" :
+                strategy = new GetAllTutor();
+                break;
+            case "STUDENT" :
+                strategy = new GetAllStudent();
+                break;
+            default:
+                throw new IllegalArgumentException(role + " - role does not exist");
+        }
     }
 
-    /**
-     * Method return {@link List} of {@link User} by some strategy
-     *
-     * @return return {@link List} of {@link User}
-     */
     public List<User> getUser(int offSet, int numberOfElement) {
         return strategy.getUser(offSet, numberOfElement);
     }

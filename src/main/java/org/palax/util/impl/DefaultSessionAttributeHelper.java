@@ -13,15 +13,9 @@ import javax.servlet.http.HttpSession;
  * @author Taras Palashynskyy
  */
 public class DefaultSessionAttributeHelper implements SessionAttributeHelper {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultSessionAttributeHelper.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile SessionAttributeHelper sessionHelper;
 
-    /**
-     * Initialization data source object if the @{code dataSource} is not initialized
-     * is stored @{code null} value
-     */
     private DefaultSessionAttributeHelper() {
     }
 

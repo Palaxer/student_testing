@@ -18,9 +18,7 @@ import java.util.List;
  * {@inheritDoc}
  */
 public class DefaultTestService implements TestService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultTestService.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile TestService testService;
     private static TestDao testDao;
     private static QuestionDao questionDao;
@@ -69,13 +67,11 @@ public class DefaultTestService implements TestService {
 
     @Override
     public List<Test> findAllByTutor(User tutor, int offSet, int numberOfElement) {
-
         return testDao.findAllByTutor(tutor, offSet, numberOfElement);
     }
 
     @Override
     public List<Test> findAllByCategoryAndActive(Category category, boolean active, int offSet, int numberOfElement) {
-
         if(category == null)
             return testDao.findAllByActive(active, offSet, numberOfElement);
 
@@ -84,29 +80,24 @@ public class DefaultTestService implements TestService {
 
     @Override
     public long countByTutor(User tutor) {
-
         return testDao.countByTutor(tutor);
     }
 
     @Override
     public long countByCategoryAndActive(Category category, boolean active) {
-
         if(category == null)
             return testDao.countByActive(active);
-
 
         return testDao.countByCategoryAndActive(category, active);
     }
 
     @Override
     public boolean update(Test test) {
-
         return testDao.update(test);
     }
 
     @Override
     public boolean create(Test test) {
-
         test.setActive(false);
         test.setPassedScore(0);
 

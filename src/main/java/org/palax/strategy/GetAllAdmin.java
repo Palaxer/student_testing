@@ -14,7 +14,6 @@ import java.util.List;
  * @author Taras Palashynskyy
  * @see GetUserStrategy
  */
-
 public class GetAllAdmin implements GetUserStrategy {
     private static UserService userService;
 

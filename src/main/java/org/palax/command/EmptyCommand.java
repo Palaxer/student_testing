@@ -1,5 +1,6 @@
 package org.palax.command;
 
+import org.palax.exception.PageNotFoundException;
 import org.palax.util.PathManager;
 
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +19,6 @@ public class EmptyCommand implements Command {
      */
     @Override
     public String execute(HttpServletRequest request, HttpServletResponse response) {
-        String page = PathManager.getProperty("path.page.error404");
-
-        return page;
+        throw new PageNotFoundException("An empty command came");
     }
 }

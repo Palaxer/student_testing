@@ -9,15 +9,18 @@ import java.util.List;
 
 public class TestDBManager {
 
-    public static final DataSourceManager ds = new TestDataSourceManager();
+    private static final DataSourceManager ds = new TestDataSourceManager();
+    private static final String DB_CATALOG = "`student_testing_db_test`";
+    private static final String DDL_SQL_FILE_NAME = "student_testing_db_test_DDL.sql";
+    private static final String DML_SQL_FILE_NAME = "student_testing_db_test_DML.sql";
 
     public static void setUpTestDDL() {
         try(Connection conn = ds.getConnection();
             Statement stm = conn.createStatement()) {
 
-            stm.execute("DROP DATABASE IF EXISTS `student_testing_db_test`");
+            stm.execute("DROP DATABASE IF EXISTS " + DB_CATALOG);
 
-            Path path = Paths.get(ClassLoader.getSystemResource("student_testing_db_test_DDL.sql").toURI());
+            Path path = Paths.get(ClassLoader.getSystemResource(DDL_SQL_FILE_NAME).toURI());
             List<String> sqlList = Files.readAllLines(path);
             for (String sql : sqlList) {
                 stm.addBatch(sql);
@@ -33,15 +36,15 @@ public class TestDBManager {
         try(Connection conn = ds.getConnection();
             Statement stm = conn.createStatement()) {
 
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`complete_test`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`answer`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`question`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`test`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`user`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`category`");
-            stm.addBatch("DELETE FROM `student_testing_db_test`.`role`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`complete_test`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`answer`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`question`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`test`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`user`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`category`");
+            stm.addBatch("DELETE FROM " + DB_CATALOG + ".`role`");
 
-            Path path = Paths.get(ClassLoader.getSystemResource("student_testing_db_test_DML.sql").toURI());
+            Path path = Paths.get(ClassLoader.getSystemResource(DML_SQL_FILE_NAME).toURI());
             List<String> sqlList = Files.readAllLines(path);
             for (String sql : sqlList) {
                 stm.addBatch(sql);

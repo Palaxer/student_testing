@@ -3,6 +3,7 @@ package org.palax;
 import org.apache.log4j.Logger;
 import org.palax.command.Command;
 import org.palax.command.CommandHelper;
+import org.palax.exception.PageNotFoundException;
 import org.palax.util.PathManager;
 
 import javax.servlet.RequestDispatcher;
@@ -18,16 +19,22 @@ import java.io.IOException;
  *
  * @author Taras Palashynskyy
  */
-
 public class Controller extends HttpServlet {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(Controller.class);
+    private static final String PAGE_PREFIX = "jsp";
+
+    private static CommandHelper commandHelper;
+
+    public Controller() {
+        commandHelper = CommandHelper.getInstance();
+    }
 
     /**
      *  {@inheritDoc}
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
@@ -35,41 +42,67 @@ public class Controller extends HttpServlet {
      *  {@inheritDoc}
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         processRequest(request, response);
     }
 
-    /**
-     * Method of processing all requests
-     *
-     * @param request {@link HttpServletRequest}
-     * @param response {@link HttpServletResponse}
-     * @throws ServletException {@link ServletException}
-     * @throws IOException {@link IOException}
-     */
     private void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        if(!response.isCommitted()) {
-            String page = null;
-
-            Command command = CommandHelper.getInstance().getCommand(request);
-
-            page = command.execute(request, response);
-
-            if (page != null) {
-                if (page.contains("jsp")) {
-                    logger.info("Forward to " + page);
-                    RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(page);
-                    dispatcher.forward(request, response);
-                } else {
-                    logger.info("Forward to " + page);
-                    response.sendRedirect(request.getContextPath() + page);
-                }
-            } else {
-                page = PathManager.getProperty("path.page.error500");
-                logger.info("Forward to " + page);
-                response.sendRedirect(request.getContextPath() + page);
-            }
+        try {
+            tryProcessRequest(request, response);
+        } catch (PageNotFoundException e) {
+            logger.debug("Threw a PageNotFoundException, full stack trace follows:",e);
+            forwardToNotFoundErrorPage(request, response);
+        } catch (Exception e) {
+            logger.error("Threw an Exception, full stack trace follows:",e);
+            forwardToServerErrorPage(request, response);
         }
+    }
+
+    private void tryProcessRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        if(!response.isCommitted()) {
+            String page = executeCommand(request, response);
+            resolvePagePath(page, request, response);
+        }
+    }
+
+    private String executeCommand(HttpServletRequest request, HttpServletResponse response) {
+        Command command = commandHelper.getCommand(request);
+        return command.execute(request, response);
+    }
+
+    private void resolvePagePath(String page, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        if (page.contains(PAGE_PREFIX))
+            forwardToPage(page, request, response);
+        else
+            redirectToPage(page, request, response);
+    }
+
+    private void forwardToPage(String page, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        logger.info("Forward to " + page);
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(page);
+        dispatcher.forward(request, response);
+    }
+
+    private void redirectToPage(String page, HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        logger.info("Forward to " + page);
+        response.sendRedirect(request.getContextPath() + page);
+    }
+
+    private void forwardToNotFoundErrorPage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String page = PathManager.getProperty("path.page.error404");
+        forwardToPage(page, request, response);
+    }
+
+    private void forwardToServerErrorPage(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String page = PathManager.getProperty("path.page.error500");
+        forwardToPage(page, request, response);
     }
 }

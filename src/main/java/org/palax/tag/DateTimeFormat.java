@@ -13,32 +13,18 @@ import java.time.format.DateTimeFormatter;
  *
  * @author Taras Palashynskyy
  */
-
 public class DateTimeFormat extends SimpleTagSupport {
-    /**The value is used for store {@code date} which will be pass in the attribute
-     * and represents by {@link LocalDateTime}. */
+
     private LocalDateTime date;
-    /**The value is used for store {@code local} which will be pass in the attribute
-     * and used to select which format will be use to date. */
     private String local;
 
     public DateTimeFormat() {
     }
 
-    /**
-     * Sets {@code date} attribute and represents by {@link Timestamp}
-     *
-     * @param date {@code date} attribute
-     */
     public void setDate(LocalDateTime date) {
         this.date = date;
     }
 
-    /**
-     * Sets {@code local} attribute which will be used to select which format will be use to date
-     *
-     * @param local {@code date} attribute
-     */
     public void setLocal(String local) {
         this.local = local;
     }
@@ -46,13 +32,19 @@ public class DateTimeFormat extends SimpleTagSupport {
     /**
      * Formats a date depending on locale attribute if a given locale is not present
      * is formed as follows: {@code "MM/dd/yyyy HH:mm"}
-     *
-     * @throws JspException {@link JspException}
-     * @throws IOException {@link IOException}
      */
     @Override
-    public void doTag() throws JspException, IOException {
+    public void doTag() throws IOException {
+        if(date != null)
+            writeFormattedDate();
+    }
 
+    private void writeFormattedDate() throws IOException {
+        DateTimeFormatter df = getDateTimeFormatter();
+        getJspContext().getOut().write(df.format(date));
+    }
+
+    private DateTimeFormatter getDateTimeFormatter() {
         DateTimeFormatter df;
 
         switch (local) {
@@ -67,7 +59,9 @@ public class DateTimeFormat extends SimpleTagSupport {
                 break;
         }
 
-        if(date != null)
-            getJspContext().getOut().write(df.format(date));
+        return df;
     }
+
+
+
 }

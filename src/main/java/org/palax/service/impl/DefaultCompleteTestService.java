@@ -17,9 +17,9 @@ import java.util.Map;
  * {@inheritDoc}
  */
 public class DefaultCompleteTestService implements CompleteTestService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultCompleteTestService.class);
-    /**Singleton object which is returned when you try to create a new instance */
+    private static final int SECONDS_IN_MINUTE = 60;
+
     private static volatile CompleteTestService completeTestService;
     private static CompleteTestDao completeTestDao;
     private static TestDao testDao;
@@ -58,7 +58,6 @@ public class DefaultCompleteTestService implements CompleteTestService {
      */
     @Override
     public List<CompleteTest> findAllByStudent(User student) {
-
         return completeTestDao.findAllByStudent(student);
     }
 
@@ -69,9 +68,8 @@ public class DefaultCompleteTestService implements CompleteTestService {
     public List<CompleteTest> findAllByStudent(User student, int offSet, int numberOfElement) {
         List<CompleteTest> completeTests = completeTestDao.findAllByStudent(student, offSet, numberOfElement);
 
-        for(CompleteTest completeTest : completeTests){
+        for(CompleteTest completeTest : completeTests)
             completeTest.setTest(testDao.findById(completeTest.getTest().getId()));
-        }
 
         return completeTests;
     }
@@ -81,7 +79,6 @@ public class DefaultCompleteTestService implements CompleteTestService {
      */
     @Override
     public List<CompleteTest> findAllByTest(Test test) {
-
         return completeTestDao.findAllByTest(test);
     }
 
@@ -90,7 +87,6 @@ public class DefaultCompleteTestService implements CompleteTestService {
      */
     @Override
     public long countByUser(User user) {
-
         return completeTestDao.countByUser(user);
     }
 
@@ -99,41 +95,58 @@ public class DefaultCompleteTestService implements CompleteTestService {
      */
     @Override
     public CompleteTest findById(Long id) {
-
         return completeTestDao.findById(id);
     }
 
     @Override
     public boolean completeTest(CompleteTest completeTest, Map<Long, Boolean> userAnswers) {
+        int score = calculateScore(completeTest, userAnswers);
 
+        completeTest.setScore(score);
+
+        checkTestPass(completeTest);
+
+        return completeTestDao.insert(completeTest);
+    }
+
+    private int calculateScore(CompleteTest completeTest, Map<Long, Boolean> userAnswers) {
         int score = 0;
-        boolean correct;
+
 
         List<Question> questions = questionDao.findAllByTest(completeTest.getTest());
         for (Question question : questions) {
             question.setAnswers(answerDao.findAllByQuestion(question));
-
-            correct = true;
-
-            for(Answer answer : question.getAnswers()) {
-                if(!(answer.getCorrect().equals(userAnswers.get(answer.getId()) != null))) {
-                    correct = false;
-                    break;
-                }
-            }
-
-            if(correct)
+            
+            if(isCorrectAnswer(userAnswers,question))
                 score++;
         }
-
-        completeTest.setScore(score);
-
-        if(completeTest.getElapsedTime() <= completeTest.getTest().getPassedTime() &&
-                completeTest.getScore() >= completeTest.getTest().getPassedScore()) {
-            completeTest.setPassed(true);
-        } else
-            completeTest.setPassed(false);
-
-        return completeTestDao.insert(completeTest);
+        return score;
     }
+
+    private boolean isCorrectAnswer(Map<Long, Boolean> userAnswers, Question question) {
+        boolean correct = true;
+        for(Answer answer : question.getAnswers()) {
+            if(!(answer.getCorrect().equals(userAnswers.get(answer.getId()) != null))) {
+                correct = false;
+                break;
+            }
+        }
+        return correct;
+    }
+
+    private boolean checkTestPass(CompleteTest completeTest) {
+
+        boolean result = false;
+
+        if((completeTest.getElapsedTime() / SECONDS_IN_MINUTE) <= completeTest.getTest().getPassedTime() &&
+                completeTest.getScore() >= completeTest.getTest().getPassedScore()) {
+            result = true;
+            completeTest.setPassed(result);
+        } else
+            completeTest.setPassed(result);
+
+        return result;
+    }
+
+
 }

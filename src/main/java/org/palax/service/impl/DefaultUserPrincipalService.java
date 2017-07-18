@@ -12,7 +12,6 @@ import java.util.*;
  * {@inheritDoc}
  */
 public class DefaultUserPrincipalService implements UserPrincipalService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultUserPrincipalService.class);
 
     /**Map which store {@link User} base mapping to redirection page. */
@@ -20,7 +19,7 @@ public class DefaultUserPrincipalService implements UserPrincipalService {
     /**Map which store {@link User} permission mapping, where store
      * page {@code path} and {@code roleType} which has permission to page. */
     private static final Map<String, Set<String>> userPermissionMapping = new HashMap<>();
-    /**Singleton object which is returned when you try to create a new instance */
+    private static final String COMMAND_PREFIX = "command.";
     private static volatile UserPrincipalService userPrincipalService;
 
     /**
@@ -32,18 +31,28 @@ public class DefaultUserPrincipalService implements UserPrincipalService {
         userBaseMapping.put("STUDENT", PathManager.getProperty("path.redirect.student"));
         userBaseMapping.put("TUTOR", PathManager.getProperty("path.redirect.tutor"));
 
-        Enumeration<String> key = UserPrincipalManager.getKey();
+        createUserPermissionMapping();
+    }
 
-        while (key.hasMoreElements()) {
-            String keys = key.nextElement();
-            Set<String> value = new HashSet<>();
+    private void createUserPermissionMapping() {
+        Enumeration<String> keys = UserPrincipalManager.getKeys();
 
-            StringTokenizer stringTokenizer = new StringTokenizer(UserPrincipalManager.getProperty(keys));
-            while(stringTokenizer.hasMoreTokens()) {
-                value.add(stringTokenizer.nextToken());
-            }
-            userPermissionMapping.put(keys.replace("command.", ""), value);
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            key = key.replace(COMMAND_PREFIX, "");
+            Set<String> value = fillCommandRoles(key);
+            userPermissionMapping.put(key, value);
         }
+    }
+
+    private Set<String> fillCommandRoles(String key) {
+        Set<String> value = new HashSet<>();
+
+        StringTokenizer stringTokenizer = new StringTokenizer(UserPrincipalManager.getProperty(key));
+        while(stringTokenizer.hasMoreTokens()) {
+            value.add(stringTokenizer.nextToken());
+        }
+        return value;
     }
 
     /**
@@ -71,13 +80,25 @@ public class DefaultUserPrincipalService implements UserPrincipalService {
      */
     @Override
     public boolean permission(User user, String command) {
+        Set<String> allowedRolesForCommand = userPermissionMapping.get(command);
 
-        if(user == null) {
-            return userPermissionMapping.get(command).contains("UNSIGNED");
-        }
+        //Forbid access to all unregistered command
+        if(allowedRolesForCommand == null)
+            return false;
 
-        return userPermissionMapping.get(command).contains(user.getRole().name()) ||
-                userPermissionMapping.get(command).contains("ALL");
+        //If the user is not authorized,
+        //then check whether unauthorized users can access to the command
+        if(user == null)
+            return allowedRolesForCommand.contains("UNSIGNED");
+
+        //If the user is authorized then check the ability
+        //to access the command of all roles
+        if(allowedRolesForCommand.contains("ALL"))
+            return true;
+
+        //If the user is authorized then check the ability
+        //to access the command by its role
+        return allowedRolesForCommand.contains(user.getRole().name());
     }
 
     /**
@@ -86,12 +107,14 @@ public class DefaultUserPrincipalService implements UserPrincipalService {
     @Override
     public String userBaseMapping(User user) {
         String page = PathManager.getProperty("path.page.login");
-
-        if (user != null) {
-            page = userBaseMapping.getOrDefault(user.getRole().name(),
-                    PathManager.getProperty("path.page.error500"));
-        }
+        if (user != null)
+            page = getUserBasePage(user);
 
         return page;
+    }
+
+    private String getUserBasePage(User user) {
+        return userBaseMapping.getOrDefault(user.getRole().name(),
+                PathManager.getProperty("path.page.error500"));
     }
 }

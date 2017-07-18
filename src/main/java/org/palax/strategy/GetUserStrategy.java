@@ -10,14 +10,8 @@ import java.util.List;
  *
  * @author Taras Palashynskyy
  */
-
 public interface GetUserStrategy {
 
-    /**
-     * Method return {@link List} of {@link User} by some strategy
-     *
-     * @return return {@link List} of {@link User}
-     */
     List<User> getUser(int offSet, int numberOfElement);
 
     long count();

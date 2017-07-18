@@ -83,7 +83,7 @@ public class SubmitTestCommand implements Command {
                 CompleteTest completeTest = new CompleteTest();
                 completeTest.setTest(test);
                 completeTest.setStartTime(startTime);
-                completeTest.setElapsedTime((int)ChronoUnit.MINUTES.between(startTime, submitTime));
+                completeTest.setElapsedTime((int)ChronoUnit.SECONDS.between(startTime, submitTime));
                 completeTest.setStudent(user);
 
                 if(completeTestService.completeTest(completeTest, userAnswers))

@@ -8,9 +8,8 @@ import java.util.ResourceBundle;
  *
  * @author Taras Palashynskyy
  */
-
 public class PathManager {
-    /**{@link ResourceBundle} which bound to {@code "path-config.properties"} file */
+
     private final static ResourceBundle resourceBundle = ResourceBundle.getBundle("path-config");
 
     private PathManager() {

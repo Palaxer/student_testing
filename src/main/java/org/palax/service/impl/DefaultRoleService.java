@@ -13,9 +13,7 @@ import java.util.List;
  * {@inheritDoc}
  */
 public class DefaultRoleService implements RoleService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultRoleService.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile RoleService roleService;
     private static RoleDao roleDao;
 
@@ -48,7 +46,6 @@ public class DefaultRoleService implements RoleService {
      */
     @Override
     public List<Role> findAll() {
-
         return roleDao.findAll();
     }
 
@@ -57,7 +54,6 @@ public class DefaultRoleService implements RoleService {
      */
     @Override
     public Role find(Role role) {
-
         return roleDao.find(role);
     }
 }

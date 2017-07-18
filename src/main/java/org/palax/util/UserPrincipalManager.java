@@ -10,9 +10,8 @@ import java.util.ResourceBundle;
  *
  * @author Taras Palashynskyy
  */
-
 public class UserPrincipalManager {
-    /**{@link ResourceBundle} which bound to {@code "user-principal-config.properties"} file */
+
     private final static ResourceBundle resourceBundle = ResourceBundle.getBundle("user-principal-config");
 
     private UserPrincipalManager() {
@@ -34,7 +33,7 @@ public class UserPrincipalManager {
      *
      * @return return all {@code key} from properties file
      */
-    public static Enumeration<String> getKey() {
+    public static Enumeration<String> getKeys() {
         return resourceBundle.getKeys();
     }
 }

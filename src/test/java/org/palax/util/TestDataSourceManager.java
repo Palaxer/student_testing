@@ -17,8 +17,11 @@ import java.sql.SQLException;
  */
 
 public class TestDataSourceManager implements DataSourceManager {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DataSourceManager.class);
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/?useSSL=false";
+    private static final String USER = "root";
+    private static final String PASSWORD = "root";
+    private static final String DB_CATALOG = "student_testing_db_test";
 
     /**
      * {@inheritDoc}
@@ -26,8 +29,8 @@ public class TestDataSourceManager implements DataSourceManager {
     @Override
     public Connection getConnection() {
         try {
-            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?useSSL=false", "root", "root");
-            con.setCatalog("student_testing_db_test");
+            Connection con = DriverManager.getConnection(DB_URL, USER, PASSWORD);
+            con.setCatalog(DB_CATALOG);
             return con;
         } catch (SQLException e) {
             logger.error("Threw a SQLException, full stack trace follows:", e);

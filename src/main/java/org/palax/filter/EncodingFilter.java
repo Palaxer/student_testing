@@ -9,22 +9,13 @@ import java.io.IOException;
  *
  * @author Taras Palashynskyy
  */
-
 public class EncodingFilter implements Filter {
+    private static final String ENCODING = "UTF-8";
 
-    /**
-     * Filtering all requests and set {@code UTF-8} character encoding
-     *
-     * @param request {@code request} all http request represent by {@link ServletRequest}
-     * @param response {@code response} all http response represent by {@link ServletResponse}
-     * @param chain {@code chain} filter chain represents by {@link FilterChain}
-     * @throws IOException {@link IOException}
-     * @throws ServletException {@link ServletException}
-     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-        request.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding(ENCODING);
 
         chain.doFilter(request, response);
     }

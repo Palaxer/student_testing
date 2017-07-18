@@ -1,6 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="d" uri="/WEB-INF/date-format.tld"%>
+<%@ taglib prefix="t" uri="/WEB-INF/complete-time-format.tld"%>
 <%@ page session="true"  isELIgnored="false" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" language="java" %>
 
 <c:set var="language" value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}" scope="session" />
@@ -46,7 +47,7 @@
                                 <td><c:out value="${completeTest.test.name}"/></td>
                                 <td><c:out value="${completeTest.score}"/></td>
                                 <td><d:dateFrm date="${completeTest.startTime}" local="${language}"/></td>
-                                <td><c:out value="${completeTest.elapsedTime}"/></td>
+                                <td><t:timeFrm time="${completeTest.elapsedTime}"/></td>
                                 <td><c:out value="${completeTest.passed}"/></td>
                                 <td>
                                     <a class="btn btn-primary btn-xs uppercase" href="<c:url value="/?command=complete-test-info&id=${completeTest.id}"/>">

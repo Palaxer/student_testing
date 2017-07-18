@@ -13,9 +13,7 @@ import java.util.List;
  * {@inheritDoc}
  */
 public class DefaultCategoryService implements CategoryService {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DefaultCategoryService.class);
-    /**Singleton object which is returned when you try to create a new instance */
     private static volatile CategoryService categoryService;
     private static CategoryDao categoryDao;
 
@@ -48,31 +46,26 @@ public class DefaultCategoryService implements CategoryService {
      */
     @Override
     public List<Category> findAll() {
-
         return categoryDao.findAll();
     }
 
     @Override
     public Category findByName(String name) {
-
         return categoryDao.findByName(name);
     }
 
     @Override
     public Category findById(Long id) {
-
         return categoryDao.findById(id);
     }
 
     @Override
     public boolean update(Category category) {
-
         return categoryDao.update(category);
     }
 
     @Override
     public boolean create(Category category) {
-
         return categoryDao.insert(category);
     }
 

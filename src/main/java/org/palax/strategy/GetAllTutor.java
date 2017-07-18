@@ -15,7 +15,6 @@ import java.util.List;
  * @author Taras Palashynskyy
  * @see GetUserStrategy
  */
-
 public class GetAllTutor implements GetUserStrategy {
     private static UserService userService;
 
@@ -23,11 +22,6 @@ public class GetAllTutor implements GetUserStrategy {
         userService = DefaultUserService.getInstance();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return return {@link List} of complete {@link User}
-     */
     @Override
     public List<User> getUser(int offSet, int numberOfElement) {
 
