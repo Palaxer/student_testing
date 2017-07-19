@@ -5,7 +5,6 @@ import org.palax.command.Command;
 import org.palax.dto.InvalidData;
 import org.palax.dto.TestDTO;
 import org.palax.entity.Question;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.QuestionService;
 import org.palax.service.TestService;
@@ -13,7 +12,9 @@ import org.palax.service.impl.DefaultQuestionService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
 import org.palax.validation.QuestionValidation;
+import org.palax.validation.TestValidation;
 import org.palax.validation.impl.DefaultQuestionValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,11 +33,15 @@ public class AddQuestionCommand implements Command {
     private static QuestionService questionService;
     private static TestService testService;
     private static QuestionValidation questionValidation;
+    private static TestValidation testValidation;
+
 
     public AddQuestionCommand() {
         questionService = DefaultQuestionService.getInstance();
         testService = DefaultTestService.getInstance();
         questionValidation = DefaultQuestionValidation.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
+
     }
 
     /**
@@ -49,30 +54,22 @@ public class AddQuestionCommand implements Command {
 
         try {
             TestDTO testDTO = testService.findById(Long.parseLong(request.getParameter("id")));
-
             User user = (User) session.getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
-                return PathManager.getProperty("path.page.error-perm");
-            }
 
-            if(testDTO.getActive()) {
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
+                return PathManager.getProperty("path.page.error-perm");
+
+            if(testDTO.getActive())
                 return page;
-            }
 
             Question question = new Question();
             question.setTest(testDTO.getTest());
             question.setText(request.getParameter("text"));
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkQuestionValidity(question);
 
-            if(!questionValidation.textValid(question.getText())) {
-                builder.setInvalidTextAttr();
-                invalidDataFlag = true;
-            }
-
-            if (invalidDataFlag) {
-                session.setAttribute("invalidData", builder.build());
+            if(invalidData != null) {
+                session.setAttribute("invalidData", invalidData);
                 session.setAttribute("text", question.getText());
             } else if (questionService.create(question)) {
                 page = PathManager.getProperty("path.redirect.question-info") + question.getId();
@@ -86,5 +83,17 @@ public class AddQuestionCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkQuestionValidity(Question question) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if(!questionValidation.textValid(question.getText())) {
+            builder.setInvalidTextAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

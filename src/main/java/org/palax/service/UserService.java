@@ -3,6 +3,7 @@ package org.palax.service;
 import org.palax.dao.UserDao;
 import org.palax.entity.Role;
 import org.palax.entity.User;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -25,20 +26,16 @@ public interface UserService {
     /**
      * Method to get all {@link User} with limit
      *
-     * @param offSet how many rows will be skipped
-     * @param numberOfElement how many rows need to get
      * @return return {@link List} of all {@link User} by limit
      */
-    List<User> findAll(int offSet, int numberOfElement);
+    List<User> findAll(Pagination pagination);
 
     /**
      * Method to get all {@link User} by {@code role} with limit
      *
-     * @param offSet how many rows will be skipped
-     * @param numberOfElement how many rows need to get
      * @return return {@link List} of all {@link User} by limit
      */
-    List<User> findAllByRole(Role role , int offSet, int numberOfElement);
+    List<User> findAllByRole(Role role , Pagination pagination);
 
     /**
      * Method return {@link User} which find by {@code id}

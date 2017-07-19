@@ -27,18 +27,26 @@ public class LogoutCommand implements Command {
 
         String login = ((User)session.getAttribute("user")).getLogin();
 
-        Enumeration<String> enumeration = session.getAttributeNames();
-        String attr;
-
-        while (enumeration.hasMoreElements()) {
-            attr = enumeration.nextElement();
-            if(!attr.equals("language"))
-                session.removeAttribute(attr);
-        }
+        clearSession(session);
 
         request.setAttribute("logout", true);
         request.setAttribute("login", login);
 
         return page;
+    }
+
+    private void clearSession(HttpSession session) {
+        Enumeration<String> enumeration = session.getAttributeNames();
+        String attr;
+
+        while (enumeration.hasMoreElements()) {
+            attr = enumeration.nextElement();
+            deleteRequiredAttr(session, attr);
+        }
+    }
+
+    private void deleteRequiredAttr(HttpSession session, String attr) {
+        if(!attr.equals("language"))
+            session.removeAttribute(attr);
     }
 }

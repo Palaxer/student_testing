@@ -72,7 +72,7 @@
                         <form method="post" action="<c:url value="/?command=add-question&id=${test.id}"/>">
                             <div class="form-group ${invalidData.invalidText} has-feedback">
                                 <label class="control-label" for="text"><fmt:message key="text.text" /></label>
-                                <textarea class="form-control" rows="4" id="text" name="text" ${active}><c:out value="${text}"/></textarea>
+                                <textarea class="form-control" rows="8" id="text" name="text" ${active}><c:out value="${text}"/></textarea>
                             </div>
                             <button type="submit" class="btn btn-lg btn-primary btn-block uppercase" ${active}>
                                 <fmt:message key="text.add-question" />
@@ -102,12 +102,12 @@
                                                 <c:choose>
                                                     <c:when test="${question.id == updateQuestion.id}">
                                                         <div class="form-group has-error has-feedback">
-                                                            <textarea class="form-control has-error" rows="2" name="text" ${active}><c:out value="${updateQuestion.text}"/></textarea>
+                                                            <textarea class="form-control has-error" rows="6" name="text" ${active}><c:out value="${updateQuestion.text}"/></textarea>
                                                         </div>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <div class="form-group has-feedback">
-                                                            <textarea class="form-control" rows="2" name="text" ${active}><c:out value="${question.text}"/></textarea>
+                                                            <textarea class="form-control" rows="6" name="text" ${active}><c:out value="${question.text}"/></textarea>
                                                         </div>
                                                     </c:otherwise>
                                                 </c:choose>

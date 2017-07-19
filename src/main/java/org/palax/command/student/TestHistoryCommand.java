@@ -8,6 +8,7 @@ import org.palax.entity.User;
 import org.palax.service.CompleteTestService;
 import org.palax.service.impl.DefaultCompleteTestService;
 import org.palax.util.PathManager;
+import org.palax.util.impl.DefaultPagination;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,29 +35,16 @@ public class TestHistoryCommand implements Command {
         String page = PathManager.getProperty("path.page.test-history");
         request.setAttribute("testHistorySelect", "active");
 
-        int currentPage = 1;
-
-        try {
-            if(request.getParameter("page") != null)
-                currentPage = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
-            logger.error("Threw a NumberFormatException, full stack trace follows:", e);
-        }
-
         User user = (User)request.getSession().getAttribute("user");
 
-        long count = completeTestService.countByUser(user);
+        DefaultPagination pagination = new DefaultPagination(ELEMENT_PER_PAGE);
+        pagination.setElementCount(completeTestService.countByUser(user));
+        pagination.setCurrentPage(request.getParameter("page"));
 
-        int pageNumber = (int) Math.ceil(count * 1.0 / ELEMENT_PER_PAGE);
+        request.setAttribute("pageNumber", pagination.getPageNumber());
+        request.setAttribute("currentPage", pagination.getCurrentPage());
 
-        if(currentPage > pageNumber && pageNumber != 0)
-            return PathManager.getProperty("path.page.error404");
-
-        request.setAttribute("pageNumber", pageNumber);
-        request.setAttribute("currentPage", currentPage);
-
-        request.setAttribute("completeTests", completeTestService.findAllByStudent(user, currentPage * ELEMENT_PER_PAGE - ELEMENT_PER_PAGE,
-                ELEMENT_PER_PAGE));
+        request.setAttribute("completeTests", completeTestService.findAllByStudent(user, pagination));
 
         return page;
     }

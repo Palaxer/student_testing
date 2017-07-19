@@ -1,6 +1,7 @@
 package org.palax.strategy;
 
 import org.palax.entity.User;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -32,8 +33,8 @@ public class GetUser implements GetUserStrategy {
         }
     }
 
-    public List<User> getUser(int offSet, int numberOfElement) {
-        return strategy.getUser(offSet, numberOfElement);
+    public List<User> getUser(Pagination pagination) {
+        return strategy.getUser(pagination);
     }
 
     @Override

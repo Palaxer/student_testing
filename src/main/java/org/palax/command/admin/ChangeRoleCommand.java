@@ -18,7 +18,6 @@ import javax.servlet.http.HttpSession;
  * @author Taras Palashynskyy
  */
 public class ChangeRoleCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(UserInfoCommand.class);
 
     private static UserService userService;
@@ -36,15 +35,14 @@ public class ChangeRoleCommand implements Command {
             long id = Long.parseLong(request.getParameter("id"));
             page = PathManager.getProperty("path.redirect.user-info") + id;
 
+            Role role = Role.valueOf(request.getParameter("role"));
             User user = userService.findById(id);
 
             if(user != null) {
-                if(request.getParameter("role") != null) {
-                    if(userService.changeRole(user, Role.valueOf(request.getParameter("role"))))
-                        session.setAttribute("updateSuccess", true);
-                     else
-                        session.setAttribute("invalidUpdate", true);
-                }
+                if (userService.changeRole(user, role))
+                    session.setAttribute("updateSuccess", true);
+                else
+                    session.setAttribute("invalidUpdate", true);
             }
         } catch (IllegalArgumentException e) {
             logger.error("Threw a IllegalArgumentException, full stack trace follows:", e);

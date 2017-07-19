@@ -36,19 +36,32 @@ public class LoginCommand implements Command {
         String login = request.getParameter("login");
         String passwd = request.getParameter("passwd");
 
-        if(login != null && passwd != null) {
-            User user = loginService.login(login, passwd);
-            if(user != null) {
-                request.getSession().setAttribute("user", user);
-                page = userPrincipalService.userBaseMapping(user);
+        User user = getUser(login, passwd);
 
-                return page;
-            }
+        if(user != null) {
+            request.getSession().setAttribute("user", user);
+            page = userPrincipalService.userBaseMapping(user);
+
+            return page;
         }
 
         request.setAttribute("loginError", true);
         request.setAttribute("login", login);
 
         return page;
+    }
+
+    private User getUser(String login, String passwd) {
+        User user = null;
+
+        if(checkLoginAndPasswd(login, passwd)) {
+            user = loginService.login(login, passwd);
+        }
+
+        return user;
+    }
+
+    private boolean checkLoginAndPasswd(String login, String passwd) {
+        return login != null && passwd != null;
     }
 }

@@ -43,20 +43,10 @@ public class ChangeUserPasswdCommand implements Command {
         userService.duplicate(user,updateUser);
         updateUser.setPassword(request.getParameter("passwd"));
 
-        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-        boolean invalidDataFlag = false;
+        InvalidData invalidData = checkPasswdValidity(updateUser.getPassword(), request.getParameter("confirmPasswd"));
 
-        if(!userValidation.passwdValid(updateUser.getPassword())) {
-            builder.setInvalidPasswdAttr();
-            invalidDataFlag = true;
-        }
-        if(!updateUser.getPassword().equals(request.getParameter("confirmPasswd"))) {
-            builder.setInvalidConfirmPasswdAttr();
-            invalidDataFlag = true;
-        }
-
-        if(invalidDataFlag)
-            request.setAttribute("invalidDataPasswd", builder.build());
+        if(invalidData != null)
+            request.setAttribute("invalidDataPasswd", invalidData);
         else if(userService.update(updateUser)) {
             request.setAttribute("updateSuccessPasswd", true);
             userService.duplicate(updateUser, user);
@@ -64,5 +54,21 @@ public class ChangeUserPasswdCommand implements Command {
             request.setAttribute("invalidUpdatePasswd", true);
 
         return page;
+    }
+
+    private InvalidData checkPasswdValidity(String passwd, String confirmPasswd) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if(!userValidation.passwdValid(passwd)) {
+            builder.setInvalidPasswdAttr();
+            invalidDataFlag = true;
+        }
+        if(!passwd.equals(confirmPasswd)) {
+            builder.setInvalidConfirmPasswdAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

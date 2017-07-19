@@ -36,7 +36,7 @@ public class FindUserCommand implements Command {
 
         String login = request.getParameter("login");
 
-        if(login != null && !login.isEmpty()) {
+        if(checkLogin(login)) {
             User user = userService.findByLogin(login);
 
             if(user != null) {
@@ -49,5 +49,9 @@ public class FindUserCommand implements Command {
         request.getSession().setAttribute("notFound", true);
 
         return page;
+    }
+
+    private boolean checkLogin(String login) {
+        return login != null && !login.isEmpty();
     }
 }

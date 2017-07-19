@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author Taras Palashynskyy
  */
 public class UpdateUserCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(UpdateUserCommand.class);
     private static UserService userService;
     private static UserValidation userValidation;
@@ -44,6 +43,20 @@ public class UpdateUserCommand implements Command {
         updateUser.setName(request.getParameter("name"));
         updateUser.setSurname(request.getParameter("surname"));
 
+        InvalidData invalidData = checkUserValidity(updateUser);
+
+        if(invalidData != null)
+            request.setAttribute("invalidData", invalidData);
+        else if(userService.update(updateUser)) {
+            request.setAttribute("updateSuccess", true);
+            userService.duplicate(updateUser, user);
+        } else
+            request.setAttribute("invalidUpdate", true);
+
+        return page;
+    }
+
+    private InvalidData checkUserValidity(User updateUser) {
         InvalidData.Builder builder = InvalidData.newBuilder("has-error");
         boolean invalidDataFlag = false;
 
@@ -56,14 +69,6 @@ public class UpdateUserCommand implements Command {
             invalidDataFlag = true;
         }
 
-        if(invalidDataFlag)
-            request.setAttribute("invalidData", builder.build());
-        else if(userService.update(updateUser)) {
-            request.setAttribute("updateSuccess", true);
-            userService.duplicate(updateUser, user);
-        } else
-            request.setAttribute("invalidUpdate", true);
-
-        return page;
+        return invalidDataFlag ? builder.build() : null;
     }
 }

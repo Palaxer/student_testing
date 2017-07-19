@@ -8,6 +8,7 @@ import org.palax.service.TestService;
 import org.palax.service.impl.DefaultCategoryService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
+import org.palax.util.impl.DefaultPagination;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -20,10 +21,9 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 public class GetAllTestCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(GetAllTestCommand.class);
 
-    private static final int ELEMENT_PER_PAGE = 10;
+    private static final int ELEMENT_PER_PAGE = 2;
     private static TestService testService;
     private static CategoryService categoryService;
 
@@ -37,46 +37,42 @@ public class GetAllTestCommand implements Command {
         String page = PathManager.getProperty("path.page.tests");
         request.setAttribute("allTestSelect", "active");
 
-        Category category = null;
-        int currentPage = 1;
-
-        try {
-            if(request.getParameter("page") != null)
-                currentPage = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
-            logger.error("Threw a NumberFormatException, full stack trace follows:", e);
-        }
-
         List<Category> categories = categoryService.findAll();
         request.setAttribute("categories", categories);
+        Category category = getCategoryFromRequest(request, categories);
+        request.setAttribute("selectCategory", category != null ? category.getName() : "all");
 
-        String categoryName = request.getParameter("category").replace("%20", " ");
+        DefaultPagination pagination = new DefaultPagination(ELEMENT_PER_PAGE);
+        pagination.setElementCount(testService.countByCategoryAndActive(category, true));
+        pagination.setCurrentPage(request.getParameter("page"));
 
-        if(categoryName.equals("all")) {
-            request.setAttribute("selectCategory", "all");
-        } else {
-            for(Category el : categories) {
-                if(el.getName().equals(categoryName))
-                    category = el;
-            }
+        request.setAttribute("pageNumber", pagination.getPageNumber());
+        request.setAttribute("currentPage", pagination.getCurrentPage());
 
-            request.setAttribute("selectCategory", category != null ? category.getName() : "all");
-        }
-        long count;
-
-        count = testService.countByCategoryAndActive(category, true);
-
-        int pageNumber = (int) Math.ceil(count * 1.0 / ELEMENT_PER_PAGE);
-
-        if(currentPage > pageNumber && pageNumber != 0)
-            return PathManager.getProperty("path.page.error404");
-
-        request.setAttribute("pageNumber", pageNumber);
-        request.setAttribute("currentPage", currentPage);
-
-        request.setAttribute("tests", testService.findAllByCategoryAndActive(category, true,
-                currentPage * ELEMENT_PER_PAGE - ELEMENT_PER_PAGE, ELEMENT_PER_PAGE));
+        request.setAttribute("tests", testService.findAllByCategoryAndActive(category, true, pagination));
 
         return page;
+    }
+
+    private Category getCategoryFromRequest(HttpServletRequest request, List<Category> categories) {
+        Category category = null;
+        String categoryName = request.getParameter("category").replace("%20", " ");
+
+        if(!categoryName.equals("all")) {
+            category = findCategoryByName(categories, categoryName);
+        }
+
+        return category;
+    }
+
+    private Category findCategoryByName(List<Category> categories, String categoryName) {
+        Category category = null;
+
+        for (Category el : categories) {
+            if (el.getName().equals(categoryName))
+                category = el;
+        }
+
+        return category;
     }
 }

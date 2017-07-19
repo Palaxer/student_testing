@@ -56,25 +56,11 @@ public class CreateTestCommand implements Command {
             User user = (User) request.getSession().getAttribute("user");
             test.setTutor(user);
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkTestValidity(test);
 
-            if (!testValidation.nameValid(test.getName())) {
-                builder.setInvalidNameAttr();
-                invalidDataFlag = true;
-            }
-            if (!testValidation.descriptionValid(test.getDescription())) {
-                builder.setInvalidDescAttr();
-                invalidDataFlag = true;
-            }
-            if (!testValidation.passTimeValid(test.getPassedTime())) {
-                builder.setInvalidPassTimeAttr();
-                invalidDataFlag = true;
-            }
-
-            if (invalidDataFlag) {
+            if(invalidData != null) {
                 request.setAttribute("createTestSelect", "active");
-                request.setAttribute("invalidData", builder.build());
+                request.setAttribute("invalidData", invalidData);
                 request.setAttribute("test", test);
             } else if (testService.create(test)) {
                 page = PathManager.getProperty("path.redirect.test-info") + test.getId();
@@ -86,5 +72,25 @@ public class CreateTestCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkTestValidity(Test test) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if (!testValidation.nameValid(test.getName())) {
+            builder.setInvalidNameAttr();
+            invalidDataFlag = true;
+        }
+        if (!testValidation.descriptionValid(test.getDescription())) {
+            builder.setInvalidDescAttr();
+            invalidDataFlag = true;
+        }
+        if (!testValidation.passTimeValid(test.getPassedTime())) {
+            builder.setInvalidPassTimeAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

@@ -5,7 +5,6 @@ import org.palax.command.Command;
 import org.palax.dto.TestDTO;
 import org.palax.entity.Answer;
 import org.palax.entity.Question;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.AnswerService;
 import org.palax.service.QuestionService;
@@ -14,6 +13,8 @@ import org.palax.service.impl.DefaultAnswerService;
 import org.palax.service.impl.DefaultQuestionService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
+import org.palax.validation.TestValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -32,11 +33,15 @@ public class DeleteAnswerCommand implements Command {
     private static QuestionService questionService;
     private static TestService testService;
     private static AnswerService answerService;
+    private static TestValidation testValidation;
+
 
     public DeleteAnswerCommand() {
         questionService = DefaultQuestionService.getInstance();
         testService = DefaultTestService.getInstance();
         answerService = DefaultAnswerService.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
+
     }
 
     /**
@@ -49,22 +54,18 @@ public class DeleteAnswerCommand implements Command {
 
         try {
             Answer answer = answerService.findById(Long.parseLong(request.getParameter("id")));
-
             Question question = questionService.findById(answer.getQuestion().getId());
 
             page = PathManager.getProperty("path.redirect.question-info") + question.getId();
 
             TestDTO testDTO = testService.findById(question.getTest().getId());
-
             User user = (User) session.getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
+
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
                 return PathManager.getProperty("path.page.error-perm");
-            }
 
-            if(testDTO.getActive()) {
+            if(testDTO.getActive())
                 return page;
-            }
-
 
             if (answerService.delete(answer)) {
                 session.setAttribute("deleteSuccess", true);

@@ -5,6 +5,7 @@ import org.palax.dto.TestDTO;
 import org.palax.entity.CompleteTest;
 import org.palax.entity.Test;
 import org.palax.entity.User;
+import org.palax.util.Pagination;
 
 import java.util.List;
 import java.util.Map;
@@ -28,11 +29,9 @@ public interface CompleteTestService {
      * Method to get all {@link CompleteTest} which related to {@link User}
      *
      * @param student a {@link List} of all {@link CompleteTest} to this {@code student} will be found
-     * @param offSet how many rows will be skipped
-     * @param numberOfElement how many rows need to get
      * @return return {@link List} of all {@link CompleteTest} on this {@code student}
      */
-    List<CompleteTest> findAllByStudent(User student, int offSet, int numberOfElement);
+    List<CompleteTest> findAllByStudent(User student, Pagination pagination);
 
     /**
      * Method to get all {@link CompleteTest} which related to {@link TestDTO}

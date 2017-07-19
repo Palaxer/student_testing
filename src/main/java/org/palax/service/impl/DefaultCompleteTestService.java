@@ -8,6 +8,7 @@ import org.palax.dao.TestDao;
 import org.palax.dao.factory.MySQLDAOFactory;
 import org.palax.entity.*;
 import org.palax.service.CompleteTestService;
+import org.palax.util.Pagination;
 
 import java.util.List;
 import java.util.Map;
@@ -65,8 +66,9 @@ public class DefaultCompleteTestService implements CompleteTestService {
      * {@inheritDoc}
      */
     @Override
-    public List<CompleteTest> findAllByStudent(User student, int offSet, int numberOfElement) {
-        List<CompleteTest> completeTests = completeTestDao.findAllByStudent(student, offSet, numberOfElement);
+    public List<CompleteTest> findAllByStudent(User student, Pagination pagination) {
+        List<CompleteTest> completeTests = completeTestDao.findAllByStudent(student, pagination.getElementOffSet(),
+                pagination.getElementPerPage());
 
         for(CompleteTest completeTest : completeTests)
             completeTest.setTest(testDao.findById(completeTest.getTest().getId()));
@@ -101,10 +103,8 @@ public class DefaultCompleteTestService implements CompleteTestService {
     @Override
     public boolean completeTest(CompleteTest completeTest, Map<Long, Boolean> userAnswers) {
         int score = calculateScore(completeTest, userAnswers);
-
         completeTest.setScore(score);
-
-        checkTestPass(completeTest);
+        completeTest.setPassed(isTestPassed(completeTest));
 
         return completeTestDao.insert(completeTest);
     }
@@ -112,12 +112,10 @@ public class DefaultCompleteTestService implements CompleteTestService {
     private int calculateScore(CompleteTest completeTest, Map<Long, Boolean> userAnswers) {
         int score = 0;
 
-
         List<Question> questions = questionDao.findAllByTest(completeTest.getTest());
         for (Question question : questions) {
             question.setAnswers(answerDao.findAllByQuestion(question));
-            
-            if(isCorrectAnswer(userAnswers,question))
+            if(isCorrectAnswer(userAnswers, question))
                 score++;
         }
         return score;
@@ -125,28 +123,38 @@ public class DefaultCompleteTestService implements CompleteTestService {
 
     private boolean isCorrectAnswer(Map<Long, Boolean> userAnswers, Question question) {
         boolean correct = true;
-        for(Answer answer : question.getAnswers()) {
-            if(!(answer.getCorrect().equals(userAnswers.get(answer.getId()) != null))) {
+        for(Answer answer : question.getAnswers())
+            if(!isAnswerTheSame(userAnswers, answer)) {
                 correct = false;
                 break;
             }
-        }
+
         return correct;
     }
 
-    private boolean checkTestPass(CompleteTest completeTest) {
+    private boolean isAnswerTheSame(Map<Long, Boolean> userAnswers, Answer answer) {
+        return answer.getCorrect().equals(answerGivenByUser(userAnswers, answer));
+    }
 
+    private boolean answerGivenByUser(Map<Long, Boolean> userAnswers, Answer answer) {
+        return userAnswers.get(answer.getId()) != null;
+    }
+
+    private boolean isTestPassed(CompleteTest completeTest) {
         boolean result = false;
 
-        if((completeTest.getElapsedTime() / SECONDS_IN_MINUTE) <= completeTest.getTest().getPassedTime() &&
-                completeTest.getScore() >= completeTest.getTest().getPassedScore()) {
+        if(checkTimeLimit(completeTest) && checkScoreLimit(completeTest))
             result = true;
-            completeTest.setPassed(result);
-        } else
-            completeTest.setPassed(result);
 
         return result;
     }
 
+    private boolean checkScoreLimit(CompleteTest completeTest) {
+        return completeTest.getScore() >= completeTest.getTest().getPassedScore();
+    }
 
+    private boolean checkTimeLimit(CompleteTest completeTest) {
+        int userElapsedTimeInMinutes = completeTest.getElapsedTime() / SECONDS_IN_MINUTE;
+        return userElapsedTimeInMinutes <= completeTest.getTest().getPassedTime();
+    }
 }

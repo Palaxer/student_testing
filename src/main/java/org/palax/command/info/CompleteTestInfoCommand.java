@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author Taras Palashynskyy
  */
 public class CompleteTestInfoCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(CompleteTestInfoCommand.class);
 
     private static TestService testService;

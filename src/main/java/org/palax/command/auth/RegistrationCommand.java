@@ -20,9 +20,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author Taras Palashynskyy
  */
-
 public class RegistrationCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(RegistrationCommand.class);
     private static UserService userService;
     private static UserValidation userValidation;
@@ -39,6 +37,24 @@ public class RegistrationCommand implements Command {
     public String execute(HttpServletRequest request, HttpServletResponse response) {
         String page = PathManager.getProperty("path.page.registration");
 
+        User user = getUserFromRequest(request);
+
+        InvalidData invalidData = checkUserValidity(user, request.getParameter("confirmPasswd"));
+
+        if(invalidData != null)
+            request.setAttribute("invalidData", invalidData);
+        else if(userService.create(user)) {
+            page = PathManager.getProperty("path.page.login");
+            request.setAttribute("login", user.getLogin());
+        } else
+            request.setAttribute("loginExist", true);
+
+        request.setAttribute("user", user);
+
+        return page;
+    }
+
+    private User getUserFromRequest(HttpServletRequest request) {
         User user = new User();
         user.setLogin(request.getParameter("login"));
         user.setPassword(request.getParameter("passwd"));
@@ -46,6 +62,10 @@ public class RegistrationCommand implements Command {
         user.setSurname(request.getParameter("surname"));
         user.setRole(Role.STUDENT);
 
+        return user;
+    }
+
+    private InvalidData checkUserValidity(User user, String confirmPasswd) {
         InvalidData.Builder builder = InvalidData.newBuilder("has-error");
         boolean invalidDataFlag = false;
 
@@ -65,21 +85,11 @@ public class RegistrationCommand implements Command {
             builder.setInvalidPasswdAttr();
             invalidDataFlag = true;
         }
-        if(!user.getPassword().equals(request.getParameter("confirmPasswd"))) {
+        if(!user.getPassword().equals(confirmPasswd)) {
             builder.setInvalidConfirmPasswdAttr();
             invalidDataFlag = true;
         }
 
-        if(invalidDataFlag)
-            request.setAttribute("invalidData", builder.build());
-        else if(userService.create(user)) {
-            page = PathManager.getProperty("path.page.login");
-            request.setAttribute("login", user.getLogin());
-        } else
-            request.setAttribute("loginExist", true);
-
-        request.setAttribute("user", user);
-
-        return page;
+        return invalidDataFlag ? builder.build() : null;
     }
 }

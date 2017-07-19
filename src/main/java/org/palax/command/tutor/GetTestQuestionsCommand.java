@@ -3,7 +3,6 @@ package org.palax.command.tutor;
 import org.apache.log4j.Logger;
 import org.palax.command.Command;
 import org.palax.dto.TestDTO;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.QuestionService;
 import org.palax.service.TestService;
@@ -12,6 +11,8 @@ import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
 import org.palax.util.SessionAttributeHelper;
 import org.palax.util.impl.DefaultSessionAttributeHelper;
+import org.palax.validation.TestValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +29,13 @@ public class GetTestQuestionsCommand implements Command {
 
     private static QuestionService questionService;
     private static TestService testService;
+    private static TestValidation testValidation;
     private static SessionAttributeHelper sessionHelper;
 
     public GetTestQuestionsCommand() {
         questionService = DefaultQuestionService.getInstance();
         testService = DefaultTestService.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
         sessionHelper = DefaultSessionAttributeHelper.getInstance();
     }
 
@@ -45,15 +48,13 @@ public class GetTestQuestionsCommand implements Command {
 
         try {
             TestDTO testDTO = testService.findById(Long.parseLong(request.getParameter("id")));
-
             User user = (User) request.getSession().getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
-                return PathManager.getProperty("path.page.error-perm");
-            }
 
-            if(testDTO.getActive()) {
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
+                return PathManager.getProperty("path.page.error-perm");
+
+            if(testDTO.getActive())
                 request.setAttribute("activeTest", true);
-            }
 
             sessionHelper.fromSessionToRequestScope(request, "addFailure");
             sessionHelper.fromSessionToRequestScope(request, "invalidData");
@@ -66,7 +67,6 @@ public class GetTestQuestionsCommand implements Command {
 
             request.setAttribute("questions", questionService.findAllByTest(testDTO.getTest()));
             request.setAttribute("test", testDTO);
-
 
         } catch (NumberFormatException e) {
             logger.error("Threw a NumberFormatException, full stack trace follows:", e);

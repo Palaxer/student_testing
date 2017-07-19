@@ -5,7 +5,6 @@ import org.palax.command.Command;
 import org.palax.dto.InvalidData;
 import org.palax.dto.TestDTO;
 import org.palax.entity.Category;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.CategoryService;
 import org.palax.service.TestService;
@@ -57,33 +56,14 @@ public class UpdateTestCommand implements Command {
             testDTO.setQuestionCount(Integer.valueOf(request.getParameter("q-count")));
 
             User user = (User) session.getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
+
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
                 return PathManager.getProperty("path.page.error-perm");
-            }
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkTestValidity(testDTO);
 
-            if(!testValidation.nameValid(testDTO.getName())) {
-                builder.setInvalidNameAttr();
-                invalidDataFlag = true;
-            }
-            if(!testValidation.descriptionValid(testDTO.getDescription())) {
-                builder.setInvalidDescAttr();
-                invalidDataFlag = true;
-            }
-            if(!testValidation.passScoreValid(testDTO.getPassedScore()) ||
-                    testDTO.getPassedScore() > testDTO.getQuestionCount()) {
-                builder.setInvalidPassScoreAttr();
-                invalidDataFlag = true;
-            }
-            if(!testValidation.passTimeValid(testDTO.getPassedTime())) {
-                builder.setInvalidPassTimeAttr();
-                invalidDataFlag = true;
-            }
-
-            if(invalidDataFlag)
-                session.setAttribute("invalidData", builder.build());
+            if(invalidData != null)
+                request.setAttribute("createTestSelect", "active");
             else if(testService.update(testDTO.getTest()))
                 session.setAttribute("updateSuccess", true);
             else
@@ -95,5 +75,30 @@ public class UpdateTestCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkTestValidity(TestDTO testDTO) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if(!testValidation.nameValid(testDTO.getName())) {
+            builder.setInvalidNameAttr();
+            invalidDataFlag = true;
+        }
+        if(!testValidation.descriptionValid(testDTO.getDescription())) {
+            builder.setInvalidDescAttr();
+            invalidDataFlag = true;
+        }
+        if(!testValidation.passScoreValid(testDTO.getPassedScore()) ||
+                testDTO.getPassedScore() > testDTO.getQuestionCount()) {
+            builder.setInvalidPassScoreAttr();
+            invalidDataFlag = true;
+        }
+        if(!testValidation.passTimeValid(testDTO.getPassedTime())) {
+            builder.setInvalidPassTimeAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

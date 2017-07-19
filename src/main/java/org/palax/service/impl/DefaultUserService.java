@@ -9,6 +9,7 @@ import org.palax.dao.transaction.TransactionManager;
 import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.UserService;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -63,13 +64,13 @@ public class DefaultUserService implements UserService {
      * {@inheritDoc}
      */
     @Override
-    public List<User> findAll(int offSet, int numberOfElement) {
-        return userDao.findAll(offSet, numberOfElement);
+    public List<User> findAll(Pagination pagination) {
+        return userDao.findAll(pagination.getElementOffSet(), pagination.getElementPerPage());
     }
 
     @Override
-    public List<User> findAllByRole(Role role, int offSet, int numberOfElement) {
-        return userDao.findAllByRole(role, offSet, numberOfElement);
+    public List<User> findAllByRole(Role role, Pagination pagination) {
+        return userDao.findAllByRole(role, pagination.getElementOffSet(), pagination.getElementPerPage());
     }
 
     /**

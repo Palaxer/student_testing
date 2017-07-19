@@ -1,6 +1,7 @@
 package org.palax.strategy;
 
 import org.palax.entity.User;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 public interface GetUserStrategy {
 
-    List<User> getUser(int offSet, int numberOfElement);
+    List<User> getUser(Pagination pagination);
 
     long count();
 }

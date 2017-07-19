@@ -6,7 +6,6 @@ import org.palax.dto.InvalidData;
 import org.palax.dto.TestDTO;
 import org.palax.entity.Answer;
 import org.palax.entity.Question;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.AnswerService;
 import org.palax.service.QuestionService;
@@ -16,7 +15,9 @@ import org.palax.service.impl.DefaultQuestionService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
 import org.palax.validation.AnswerValidation;
+import org.palax.validation.TestValidation;
 import org.palax.validation.impl.DefaultAnswerValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,12 +37,15 @@ public class AddAnswerCommand implements Command {
     private static TestService testService;
     private static AnswerValidation answerValidation;
     private static AnswerService answerService;
+    private static TestValidation testValidation;
 
     public AddAnswerCommand() {
         questionService = DefaultQuestionService.getInstance();
         testService = DefaultTestService.getInstance();
         answerValidation = DefaultAnswerValidation.getInstance();
         answerService = DefaultAnswerService.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
+
     }
 
     /**
@@ -58,31 +62,23 @@ public class AddAnswerCommand implements Command {
             page = PathManager.getProperty("path.redirect.question-info") + question.getId();
 
             TestDTO testDTO = testService.findById(question.getTest().getId());
-
             User user = (User) session.getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
-                return PathManager.getProperty("path.page.error-perm");
-            }
 
-            if(testDTO.getActive()) {
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
+                return PathManager.getProperty("path.page.error-perm");
+
+            if(testDTO.getActive())
                 return page;
-            }
 
             Answer answer = new Answer();
             answer.setQuestion(question);
             answer.setCorrect(false);
             answer.setText(request.getParameter("text"));
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkAnswerValidity(answer);
 
-            if(!answerValidation.textValid(answer.getText())) {
-                builder.setInvalidTextAttr();
-                invalidDataFlag = true;
-            }
-
-            if (invalidDataFlag) {
-                session.setAttribute("invalidData", builder.build());
+            if(invalidData != null) {
+                session.setAttribute("invalidData", invalidData);
                 session.setAttribute("text", answer.getText());
             } else if (answerService.create(answer)) {
                 session.setAttribute("addSuccess", true);
@@ -96,5 +92,17 @@ public class AddAnswerCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkAnswerValidity(Answer answer) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if(!answerValidation.textValid(answer.getText())) {
+            builder.setInvalidTextAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

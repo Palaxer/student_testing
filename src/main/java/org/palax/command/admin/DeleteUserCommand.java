@@ -18,7 +18,6 @@ import javax.servlet.http.HttpSession;
  * @author Taras Palashynskyy
  */
 public class DeleteUserCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(DeleteUserCommand.class);
 
     private static UserService userService;

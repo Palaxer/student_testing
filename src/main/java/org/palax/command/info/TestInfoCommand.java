@@ -28,7 +28,6 @@ import java.util.List;
  * @author Taras Palashynskyy
  */
 public class TestInfoCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(CompleteTestInfoCommand.class);
 
     private static TestService testService;
@@ -55,12 +54,10 @@ public class TestInfoCommand implements Command {
             long id = Long.parseLong(request.getParameter("id"));
 
             TestDTO testDTO = testService.findById(id);
-
             List<CompleteTest> completeTests = completeTestService.findAllByTest(testDTO.getTest());
-
             User user = (User)request.getSession().getAttribute("user");
 
-            if(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)
+            if(isUserAllowedToEditTest(testDTO, user))
                 request.setAttribute("permission", true);
 
             request.setAttribute("categories", categoryService.findAll());
@@ -71,5 +68,17 @@ public class TestInfoCommand implements Command {
         }
 
         return page;
+    }
+
+    private boolean isUserAllowedToEditTest(TestDTO testDTO, User user) {
+        return isUserOwnerOfTest(testDTO, user) || isAdmin(user);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() == Role.ADMIN;
+    }
+
+    private boolean isUserOwnerOfTest(TestDTO testDTO, User user) {
+        return testDTO.getTutor().getId().equals(user.getId());
     }
 }

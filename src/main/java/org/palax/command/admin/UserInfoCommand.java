@@ -23,7 +23,6 @@ import javax.servlet.http.HttpServletResponse;
  * @author Taras Palashynskyy
  */
 public class UserInfoCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(UserInfoCommand.class);
 
     private static UserService userService;

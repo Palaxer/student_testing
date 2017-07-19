@@ -39,8 +39,9 @@ public class DefaultUserPrincipalService implements UserPrincipalService {
 
         while (keys.hasMoreElements()) {
             String key = keys.nextElement();
-            key = key.replace(COMMAND_PREFIX, "");
             Set<String> value = fillCommandRoles(key);
+            //Remove prefix in order to simplify the search for a command
+            key = key.replace(COMMAND_PREFIX, "");
             userPermissionMapping.put(key, value);
         }
     }

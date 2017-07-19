@@ -20,7 +20,6 @@ import javax.servlet.http.HttpSession;
  * @author Taras Palashynskyy
  */
 public class UpdateCategoryCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(UserInfoCommand.class);
 
     private static CategoryService categoryService;
@@ -42,16 +41,10 @@ public class UpdateCategoryCommand implements Command {
             Category category = categoryService.findById(id);
             category.setName(request.getParameter("name"));
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkCategoryValidity(category);
 
-            if (!categoryValidation.nameValid(category.getName())) {
-                builder.setInvalidNameAttr();
-                invalidDataFlag = true;
-            }
-
-            if (invalidDataFlag) {
-                session.setAttribute("invalidData", builder.build());
+            if(invalidData != null) {
+                session.setAttribute("invalidData", invalidData);
             } else if (categoryService.update(category)) {
                 session.setAttribute("updateSuccess", true);
             } else
@@ -62,5 +55,17 @@ public class UpdateCategoryCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkCategoryValidity(Category category) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if (!categoryValidation.nameValid(category.getName())) {
+            builder.setInvalidNameAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

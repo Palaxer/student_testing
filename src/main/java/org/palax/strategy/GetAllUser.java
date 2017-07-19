@@ -3,6 +3,7 @@ package org.palax.strategy;
 import org.palax.entity.User;
 import org.palax.service.UserService;
 import org.palax.service.impl.DefaultUserService;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -21,9 +22,9 @@ public class GetAllUser implements GetUserStrategy {
     }
 
     @Override
-    public List<User> getUser(int offSet, int numberOfElement) {
+    public List<User> getUser(Pagination pagination) {
 
-        return  userService.findAll(offSet, numberOfElement);
+        return  userService.findAll(pagination);
     }
 
     @Override

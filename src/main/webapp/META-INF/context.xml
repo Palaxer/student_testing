@@ -8,6 +8,6 @@
               maxWaitMillis="-1"
               username="root"
               password="root"
-              driverClassName="com.mysql.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/student_testing_db"/>
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/student_testing_db?verifyServerCertificate=false&amp;useSSL=false&amp;requireSSL=false"/>
 </Context>

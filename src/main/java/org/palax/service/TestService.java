@@ -5,6 +5,7 @@ import org.palax.dto.TestDTO;
 import org.palax.entity.Category;
 import org.palax.entity.Test;
 import org.palax.entity.User;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -23,9 +24,9 @@ public interface TestService {
      */
     TestDTO findById(Long id);
 
-    List<Test> findAllByTutor(User tutor, int offSet, int numberOfElement);
+    List<Test> findAllByTutor(User tutor, Pagination pagination);
 
-    List<Test> findAllByCategoryAndActive(Category category, boolean active, int offSet, int numberOfElement);
+    List<Test> findAllByCategoryAndActive(Category category, boolean active, Pagination pagination);
 
     long countByTutor(User tutor);
 

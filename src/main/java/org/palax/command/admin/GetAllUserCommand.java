@@ -2,10 +2,10 @@ package org.palax.command.admin;
 
 import org.apache.log4j.Logger;
 import org.palax.command.Command;
-import org.palax.exception.PageNotFoundException;
-import org.palax.strategy.*;
+import org.palax.strategy.GetUser;
 import org.palax.util.PathManager;
 import org.palax.util.SessionAttributeHelper;
+import org.palax.util.impl.DefaultPagination;
 import org.palax.util.impl.DefaultSessionAttributeHelper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,32 +38,19 @@ public class GetAllUserCommand implements Command {
         sessionHelper.fromSessionToRequestScope(request, "notFound");
         sessionHelper.fromSessionToRequestScope(request, "deleteSuccess");
 
-        int currentPage = 1;
-
-        try {
-            if(request.getParameter("page") != null)
-                currentPage = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
-            logger.error("Threw a NumberFormatException, full stack trace follows:", e);
-        }
-
         String role = request.getParameter("role");
         request.setAttribute("role", role);
 
         GetUser userStrategy = new GetUser(role);
 
-        long count = userStrategy.count();
+        DefaultPagination pagination = new DefaultPagination(ELEMENT_PER_PAGE);
+        pagination.setElementCount(userStrategy.count());
+        pagination.setCurrentPage(request.getParameter("page"));
 
-        int pageNumber = (int) Math.ceil(count * 1.0 / ELEMENT_PER_PAGE);
+        request.setAttribute("pageNumber", pagination.getPageNumber());
+        request.setAttribute("currentPage", pagination.getCurrentPage());
 
-        if(currentPage > pageNumber)
-            throw new PageNotFoundException("The specified page was not found");
-
-        request.setAttribute("pageNumber", pageNumber);
-        request.setAttribute("currentPage", currentPage);
-
-        request.setAttribute("users", userStrategy.getUser(currentPage * ELEMENT_PER_PAGE - ELEMENT_PER_PAGE,
-                ELEMENT_PER_PAGE));
+        request.setAttribute("users", userStrategy.getUser(pagination));
 
         return page;
     }

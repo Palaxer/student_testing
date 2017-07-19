@@ -8,6 +8,7 @@ import org.palax.service.TestService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
 import org.palax.util.SessionAttributeHelper;
+import org.palax.util.impl.DefaultPagination;
 import org.palax.util.impl.DefaultSessionAttributeHelper;
 
 import javax.servlet.http.HttpServletRequest;
@@ -42,26 +43,16 @@ public class GetTutorTestCommand implements Command {
 
         sessionHelper.fromSessionToRequestScope(request, "notFound");
 
-        int currentPage = 1;
-
         User user = (User)request.getSession().getAttribute("user");
 
-        try {
-            if(request.getParameter("page") != null)
-                currentPage = Integer.parseInt(request.getParameter("page"));
-        } catch (NumberFormatException e) {
-            logger.error("Threw a NumberFormatException, full stack trace follows:", e);
-        }
+        DefaultPagination pagination = new DefaultPagination(ELEMENT_PER_PAGE);
+        pagination.setElementCount(testService.countByTutor(user));
+        pagination.setCurrentPage(request.getParameter("page"));
 
-        long count = testService.countByTutor(user);
+        request.setAttribute("pageNumber", pagination.getPageNumber());
+        request.setAttribute("currentPage", pagination.getCurrentPage());
 
-        int pageNumber = (int) Math.ceil(count * 1.0 / ELEMENT_PER_PAGE);
-
-        request.setAttribute("pageNumber", pageNumber);
-        request.setAttribute("currentPage", currentPage);
-
-        request.setAttribute("tests", testService.findAllByTutor(user, currentPage * ELEMENT_PER_PAGE - ELEMENT_PER_PAGE,
-                ELEMENT_PER_PAGE));
+        request.setAttribute("tests", testService.findAllByTutor(user, pagination));
 
         return page;
     }

@@ -157,3 +157,7 @@ textarea {
     text-transform: uppercase;
 }
 
+.notbold {
+    font-weight: normal;
+}
+

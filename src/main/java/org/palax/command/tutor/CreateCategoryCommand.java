@@ -42,16 +42,10 @@ public class CreateCategoryCommand implements Command {
             Category category = new Category();
             category.setName(request.getParameter("name"));
 
-            InvalidData.Builder builder = InvalidData.newBuilder("has-error");
-            boolean invalidDataFlag = false;
+            InvalidData invalidData = checkCategoryValidity(category);
 
-            if (!categoryValidation.nameValid(category.getName())) {
-                builder.setInvalidNameAttr();
-                invalidDataFlag = true;
-            }
-
-            if (invalidDataFlag) {
-                request.setAttribute("invalidData", builder.build());
+            if(invalidData != null) {
+                request.setAttribute("invalidData", invalidData);
                 request.setAttribute("name", category.getName());
             } else if (categoryService.create(category)) {
                 request.setAttribute("createSuccess", true);
@@ -63,5 +57,17 @@ public class CreateCategoryCommand implements Command {
         }
 
         return page;
+    }
+
+    private InvalidData checkCategoryValidity(Category category) {
+        InvalidData.Builder builder = InvalidData.newBuilder("has-error");
+        boolean invalidDataFlag = false;
+
+        if (!categoryValidation.nameValid(category.getName())) {
+            builder.setInvalidNameAttr();
+            invalidDataFlag = true;
+        }
+
+        return invalidDataFlag ? builder.build() : null;
     }
 }

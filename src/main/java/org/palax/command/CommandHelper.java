@@ -105,16 +105,20 @@ public class CommandHelper {
     public Command getCommand(HttpServletRequest request) {
         Command current = new EmptyCommand();
 
-        String action = request.getParameter("command");
-        if (action == null || action.isEmpty()) {
+        String commandName = request.getParameter("command");
+        if (isInvalidCommand(commandName)) {
             logger.info("The request doesn't pass command " + request.getMethod() + " " + request.getRequestURI());
             return current;
         }
 
-        logger.info("The request pass command " + request.getMethod() + " " + action.toUpperCase());
-        current = commandMapping.get(action.toUpperCase());
+        logger.info("The request pass command " + request.getMethod() + " " + commandName.toUpperCase());
+        current = commandMapping.getOrDefault(commandName.toUpperCase(), current);
 
         return current;
+    }
+
+    private boolean isInvalidCommand(String action) {
+        return action == null || action.isEmpty();
     }
 
 }

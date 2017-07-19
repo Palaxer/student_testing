@@ -10,6 +10,7 @@ import org.palax.entity.Category;
 import org.palax.entity.Test;
 import org.palax.entity.User;
 import org.palax.service.TestService;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -57,25 +58,31 @@ public class DefaultTestService implements TestService {
         TestDTO testDTO = new TestDTO(test);
         testDTO.setQuestionCount(questionDao.countByTest(test));
         testDTO.setCompletedTime(completeTestDao.countByTest(test));
-        int percent = 0;
-        if(testDTO.getCompletedTime() !=0 )
-            percent = completeTestDao.countByTestAndPassed(test, true) * 100 / testDTO.getCompletedTime();
+        int percent = calculateTestPassPercent(test, testDTO);
         testDTO.setPassPercent(percent);
 
         return testDTO;
     }
 
-    @Override
-    public List<Test> findAllByTutor(User tutor, int offSet, int numberOfElement) {
-        return testDao.findAllByTutor(tutor, offSet, numberOfElement);
+    private int calculateTestPassPercent(Test test, TestDTO testDTO) {
+        int percent = 0;
+        if(testDTO.getCompletedTime() !=0 )
+            percent = completeTestDao.countByTestAndPassed(test, true) * 100 / testDTO.getCompletedTime();
+        return percent;
     }
 
     @Override
-    public List<Test> findAllByCategoryAndActive(Category category, boolean active, int offSet, int numberOfElement) {
-        if(category == null)
-            return testDao.findAllByActive(active, offSet, numberOfElement);
+    public List<Test> findAllByTutor(User tutor, Pagination pagination) {
+        return testDao.findAllByTutor(tutor, pagination.getElementOffSet(), pagination.getElementPerPage());
+    }
 
-        return testDao.findAllByCategoryAndActive(category, active, offSet, numberOfElement);
+    @Override
+    public List<Test> findAllByCategoryAndActive(Category category, boolean active, Pagination pagination) {
+        if(category == null)
+            return testDao.findAllByActive(active, pagination.getElementOffSet(), pagination.getElementPerPage());
+
+        return testDao.findAllByCategoryAndActive(category, active, pagination.getElementOffSet(),
+                pagination.getElementPerPage());
     }
 
     @Override

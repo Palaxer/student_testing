@@ -4,6 +4,7 @@ import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.UserService;
 import org.palax.service.impl.DefaultUserService;
+import org.palax.util.Pagination;
 
 import java.util.List;
 
@@ -27,9 +28,9 @@ public class GetAllAdmin implements GetUserStrategy {
      * @return return {@link List} of admin {@link User}
      */
     @Override
-    public List<User> getUser(int offSet, int numberOfElement) {
+    public List<User> getUser(Pagination pagination) {
 
-        return  userService.findAllByRole(Role.ADMIN, offSet, numberOfElement);
+        return  userService.findAllByRole(Role.ADMIN, pagination);
     }
 
     @Override

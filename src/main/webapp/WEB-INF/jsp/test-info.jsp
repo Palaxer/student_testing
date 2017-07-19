@@ -177,7 +177,7 @@
                                     <td><t:timeFrm time="${completeTest.elapsedTime}"/></td>
                                     <td><c:out value="${completeTest.passed}"/></td>
                                     <td>
-                                        <a class="btn btn-primary btn-xs uppercase" href="<c:url value="/?command=complete-test-info&id=${test.id}"/>">
+                                        <a class="btn btn-primary btn-xs uppercase" href="<c:url value="/?command=complete-test-info&id=${completeTest.id}"/>">
                                             <fmt:message key="text.info" />
                                         </a>
                                     </td>

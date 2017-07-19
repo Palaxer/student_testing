@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.palax.command.Command;
 import org.palax.dto.TestDTO;
 import org.palax.entity.Question;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.AnswerService;
 import org.palax.service.QuestionService;
@@ -15,6 +14,8 @@ import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
 import org.palax.util.SessionAttributeHelper;
 import org.palax.util.impl.DefaultSessionAttributeHelper;
+import org.palax.validation.TestValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -34,12 +35,16 @@ public class GetQuestionAnswersCommand implements Command {
     private static AnswerService answerService;
     private static TestService testService;
     private static SessionAttributeHelper sessionHelper;
+    private static TestValidation testValidation;
+
 
     public GetQuestionAnswersCommand() {
         questionService = DefaultQuestionService.getInstance();
         answerService = DefaultAnswerService.getInstance();
         testService = DefaultTestService.getInstance();
         sessionHelper = DefaultSessionAttributeHelper.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
+
     }
 
     /**
@@ -52,17 +57,14 @@ public class GetQuestionAnswersCommand implements Command {
 
         try {
             Question question = questionService.findById(Long.parseLong(request.getParameter("id")));
-
             TestDTO testDTO = testService.findById(question.getTest().getId());
-
             User user = (User) session.getAttribute("user");
-            if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)) {
-                return PathManager.getProperty("path.page.error-perm");
-            }
 
-            if(testDTO.getActive()) {
+            if(!testValidation.isUserAllowedToEditTest(testDTO, user))
+                return PathManager.getProperty("path.page.error-perm");
+
+            if(testDTO.getActive())
                 request.setAttribute("activeTest", true);
-            }
 
             sessionHelper.fromSessionToRequestScope(request, "addFailure");
             sessionHelper.fromSessionToRequestScope(request, "updateSuccess");
@@ -76,7 +78,6 @@ public class GetQuestionAnswersCommand implements Command {
 
             request.setAttribute("answers", answerService.findAllByQuestion(question));
             request.setAttribute("question", question);
-
 
         } catch (NumberFormatException e) {
             logger.error("Threw a NumberFormatException, full stack trace follows:", e);

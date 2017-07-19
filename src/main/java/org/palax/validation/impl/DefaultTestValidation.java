@@ -1,6 +1,9 @@
 package org.palax.validation.impl;
 
 import org.apache.log4j.Logger;
+import org.palax.dto.TestDTO;
+import org.palax.entity.Role;
+import org.palax.entity.User;
 import org.palax.validation.TestValidation;
 
 import java.util.regex.Pattern;
@@ -54,5 +57,18 @@ public class DefaultTestValidation implements TestValidation {
     @Override
     public boolean passTimeValid(Integer passTime) {
         return passTime >= 0;
+    }
+
+    @Override
+    public boolean isUserAllowedToEditTest(TestDTO testDTO, User user) {
+        return isUserOwnerOfTest(testDTO, user) || isAdmin(user);
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() == Role.ADMIN;
+    }
+
+    private boolean isUserOwnerOfTest(TestDTO testDTO, User user) {
+        return testDTO.getTutor().getId().equals(user.getId());
     }
 }

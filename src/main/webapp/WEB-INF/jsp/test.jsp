@@ -38,14 +38,18 @@
                             <tbody>
                             <c:forEach items="${test.questions}" var="question">
                                 <tr>
-                                    <td colspan="2"><c:out value="${question.text}"/></td>
+                                    <td colspan="2">
+                                        <pre><c:out value="${question.text}"/></pre>
+                                    </td>
                                 </tr>
                                 <c:forEach items="${question.answers}" var="answer">
                                     <tr>
                                         <td width="30px">
-                                            <input type="checkbox" name="${answer.id}" value="checked">
+                                            <input id="${answer.id}" type="checkbox" name="${answer.id}" value="checked">
                                         </td>
-                                        <td><c:out value="${answer.text}"/></td>
+                                        <td>
+                                            <label class="notbold" for="${answer.id}"><c:out value="${answer.text}"/></label>
+                                        </td>
                                     </tr>
                                 </c:forEach>
                             </c:forEach>

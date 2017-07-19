@@ -3,11 +3,12 @@ package org.palax.command.tutor;
 import org.apache.log4j.Logger;
 import org.palax.command.Command;
 import org.palax.dto.TestDTO;
-import org.palax.entity.Role;
 import org.palax.entity.User;
 import org.palax.service.TestService;
 import org.palax.service.impl.DefaultTestService;
 import org.palax.util.PathManager;
+import org.palax.validation.TestValidation;
+import org.palax.validation.impl.DefaultTestValidation;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,9 +23,11 @@ public class ActivateTestCommand implements Command {
     /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(ActivateTestCommand.class);
     private static TestService testService;
+    private static TestValidation testValidation;
 
     public ActivateTestCommand() {
         testService = DefaultTestService.getInstance();
+        testValidation = DefaultTestValidation.getInstance();
     }
 
     /**
@@ -38,9 +41,8 @@ public class ActivateTestCommand implements Command {
         TestDTO testDTO = testService.findById(Long.parseLong(request.getParameter("id")));
         User user = (User) session.getAttribute("user");
 
-        if(!(testDTO.getTutor().getId().equals(user.getId()) || user.getRole() == Role.ADMIN)){
+        if(!testValidation.isUserAllowedToEditTest(testDTO, user))
             return PathManager.getProperty("path.page.error-perm");
-        }
 
         testDTO.setActive(true);
         if(testService.update(testDTO.getTest())) {
@@ -50,4 +52,5 @@ public class ActivateTestCommand implements Command {
 
         return page;
     }
+
 }

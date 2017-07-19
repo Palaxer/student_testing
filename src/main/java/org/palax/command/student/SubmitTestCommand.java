@@ -30,7 +30,6 @@ import java.util.Map;
  * @author Taras Palashynskyy
  */
 public class SubmitTestCommand implements Command {
-    /**Object for logging represent by {@link Logger}. */
     private static final Logger logger = Logger.getLogger(CompleteTestInfoCommand.class);
 
     private static TestService testService;
@@ -52,48 +51,68 @@ public class SubmitTestCommand implements Command {
         LocalDateTime startTime = (LocalDateTime) sessionHelper.getAndRemove(session, "startTestTime");
         Long startTestId = (Long) sessionHelper.getAndRemove(session, "startTestId");
         String startTestToken = sessionHelper.getAndRemove(session, "startTestToken").toString();
+        String userStartTestToken = request.getParameter("startTestToken");
 
         User user = (User) session.getAttribute("user");
 
         try {
-            Long id = Long.parseLong(request.getParameter("id"));
+            long id = Long.parseLong(request.getParameter("id"));
 
             Test test = testService.findById(id).getTest();
 
-            if(!test.getActive() || user == null) {
-                return page;
-            }
-
-            if(startTestId.equals(test.getId()) &&
-                    startTestToken.equals(request.getParameter("startTestToken"))) {
-
-                Map<Long, Boolean> userAnswers = new HashMap<>();
-
-                Enumeration<String> parameters = request.getParameterNames();
-                String param;
-
-                while (parameters.hasMoreElements()) {
-                    param = parameters.nextElement();
-
-                    if(!(param.equals("command") || param.equals("id") || param.equals("startTestToken")))
-                        userAnswers.put(Long.parseLong(param), request.getParameter(param) != null);
-
-                }
+            if (user != null && isUserCanPassTest(startTestId, startTestToken, userStartTestToken, test)) {
+                Map<Long, Boolean> userAnswers = getAnswerFromRequest(request);
 
                 CompleteTest completeTest = new CompleteTest();
                 completeTest.setTest(test);
                 completeTest.setStartTime(startTime);
-                completeTest.setElapsedTime((int)ChronoUnit.SECONDS.between(startTime, submitTime));
+                completeTest.setElapsedTime(calculateElapsedTime(submitTime, startTime));
                 completeTest.setStudent(user);
 
-                if(completeTestService.completeTest(completeTest, userAnswers))
+                if (completeTestService.completeTest(completeTest, userAnswers))
                     page = PathManager.getProperty("path.redirect.complete-test-info") + completeTest.getId();
             }
-
         } catch (NumberFormatException e) {
             logger.error("Threw a NumberFormatException, full stack trace follows:", e);
         }
 
         return page;
+    }
+
+    private boolean isUserCanPassTest(Long startTestId, String startTestToken, String userStartTestToken, Test test) {
+        return test.getActive() && isTestIdValid(startTestId, test) &&
+                isTestTokenValid(userStartTestToken, startTestToken);
+    }
+
+    private boolean isTestIdValid(Long startTestId, Test test) {
+        return startTestId.equals(test.getId());
+    }
+
+    private boolean isTestTokenValid(String userStartTestToken, String startTestToken) {
+        return startTestToken.equals(userStartTestToken);
+    }
+
+    private Map<Long, Boolean> getAnswerFromRequest(HttpServletRequest request) {
+        Map<Long, Boolean> userAnswers = new HashMap<>();
+
+        Enumeration<String> parameters = request.getParameterNames();
+        String param;
+
+        while (parameters.hasMoreElements()) {
+            param = parameters.nextElement();
+
+            if(isRequiredParameter(param))
+                userAnswers.put(Long.parseLong(param), request.getParameter(param) != null);
+
+        }
+        return userAnswers;
+    }
+
+    private boolean isRequiredParameter(String param) {
+        return !(param.equals("command") || param.equals("id") || param.equals("startTestToken"));
+    }
+
+    private int calculateElapsedTime(LocalDateTime submitTime, LocalDateTime startTime) {
+        return (int) ChronoUnit.SECONDS.between(startTime, submitTime);
     }
 }
