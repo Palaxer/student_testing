@@ -147,7 +147,7 @@
                             </div>
                         </c:if>
                         <c:if test="${test.active}">
-                            <form method="post" action="<c:url value="/?command=start-test&id=${test.id}"/>">
+                            <form onsubmit="return confirm('<fmt:message key="text.test.start-warning" />');" method="post" action="<c:url value="/?command=start-test&id=${test.id}"/>">
                                 <button type="submit" class="btn btn-lg btn-success btn-block uppercase">
                                     <fmt:message key="text.start-test" />
                                 </button>
