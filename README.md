@@ -1,5 +1,7 @@
-# student-testing
-###**_The test project created for JAVA courses_**
+# student-testing  [![Build Status](https://travis-ci.org/Palaxer/student_testing.svg?branch=master)](https://travis-ci.org/Palaxer/student_testing) 
+
+### **_The test project created for JAVA courses_**
+
 
 #### TASK
 Testing system. The **tutor** creates a **test** from several closed **questions** (choice of one or more of the N proposed **answers**) 
